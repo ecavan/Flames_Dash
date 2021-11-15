@@ -5,7 +5,6 @@ from hockey_rink import NHLRink, IIHFRink, NWHLRink
 from dash.dependencies import Input, Output
 import plotly.express as px
 import matplotlib.pyplot as plt
-import numpy as np 
 import pandas as pd 
 import os 
 import plotly.graph_objs as go
