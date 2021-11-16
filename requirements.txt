@@ -1,6 +1,6 @@
-dash==2.0.0
-dash-core-components==2.0.0
-dash-html-components==2.0.0
+dash<=2.0.0
+dash-core-components<=2.0.0
+dash-html-components<=2.0.0
 dash-table==5.0.0
 dask==2.1.0
 decorator==4.4.0
@@ -16,7 +16,7 @@ jupyter-core==4.5.0
 MarkupSafe==1.1.1
 nbformat==4.4.0
 pandas==1.2.4
-plotly==5.3.1
+plotly<=5.3.1
 pytz==2019.1
 typing-extensions==3.7.4.3
 urllib3==1.24.3
