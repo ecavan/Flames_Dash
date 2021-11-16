@@ -36,6 +36,7 @@ available_dates = df['game_date'].unique()
 #fig = px.density_heatmap(df, x="X Coordinate", y="Y Coordinate", color = "Team")
 
 app = dash.Dash()
+server = app.server
 app.layout = html.Div(children=[
     
     html.H1(children='Calgary Flames Hockey Analytics Dashboard!'),
