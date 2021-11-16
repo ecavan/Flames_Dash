@@ -1,12 +1,9 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-#from hockey_rink import NHLRink, IIHFRink, NWHLRink
 from dash.dependencies import Input, Output
 import plotly.express as px
-#import matplotlib.pyplot as plt
 import pandas as pd 
-#import os 
 import plotly.graph_objs as go
 
 
