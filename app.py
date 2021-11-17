@@ -151,7 +151,43 @@ app.layout = html.Div(children=[
     html.Hr(),
     dcc.Graph(id='display-selected-values5')])
     
-])
+]),
+    html.Div(children='''This plots is a heatmap that shows where teams enter the attacking zone'''),
+    html.Div([
+    dcc.Dropdown(
+        id='demo-dropdown8',
+        options=[{'label': k, 'value': k} for k in available_teams],
+        value=['Olympic (Women) - Canada'],
+        multi=True
+    ),
+        
+    html.Div([
+    dcc.Dropdown(
+        id='demo-dropdown9',
+        options=[{'label': k, 'value': k} for k in available_dates],
+        value=['2018-02-11'],
+        multi=True
+    ),
+        
+    dcc.Slider(
+        id='year-slider10',
+        min=df['Period'].min(),
+        max=df['Period'].max(),
+        value=df['Period'].min(),
+        marks={
+        1: '1st Period',
+        2: '2nd Period',
+        3: '3rd Period',
+        4: 'OT'
+    },
+        step=None
+    ),
+
+    html.Hr(),
+    dcc.Graph(id='display-selected-values6')])
+    
+]),
+    
 ])
 
 @app.callback(
@@ -161,14 +197,14 @@ app.layout = html.Div(children=[
     dash.dependencies.Input('year-slider', 'value')])
 
 def update_output(value,value2,value3):
-    ts = df[(df["Team"].isin(value))&(df.Event == 'Shot')&(df.Period == value3)]
+    ts = df[(df["Team"].isin(value))&(df.Event == 'Shot')&(df.Period == value3)&(df['Detail 2'] == 'On Net')]
     ts = ts[ts.game_date.isin(value2)]
     
     ts2 = df[(df["Team"].isin(value))&(df.Event == 'Goal')&(df.Period == value3)]
     ts2 = ts2[ts2.game_date.isin(value2)]
-    fig = px.scatter(ts, x="X Coordinate", y="Y Coordinate", color = "Team", title = 'Shot Plot For Each Period')
-    fig.add_scatter(x=ts2["X Coordinate"], y=ts2["Y Coordinate"], mode='markers', name="Goals")
-    
+    fig = px.scatter(ts, x="X Coordinate", y="Y Coordinate", color = "Team", title = 'Shot Plot For Each Period', hover_name="Player")
+    fig.add_scatter(x=ts2["X Coordinate"], y=ts2["Y Coordinate"], mode='markers', name="Goals", text = ts2['Team'] + ' ' + ts2['Player'])
+    fig.update_layout(yaxis_range=[0,85],xaxis_range=[0,200] )
     return fig
 
 
@@ -192,20 +228,36 @@ def update_output(value,value2,value3):
     fig = go.Figure(data=fig1.data + fig2.data + fig3.data + fig4.data)
     fig.update_layout(title = 'Pass Plot by Period', xaxis_title="X Coordinate",
     yaxis_title="Y Coordinate")
-
+    fig.update_layout(yaxis_range=[0,85],xaxis_range=[0,200] )
     return fig
 
 @app.callback(
     dash.dependencies.Output('display-selected-values3', 'figure'),
     [dash.dependencies.Input('demo-dropdown3', 'value')])
 
-def update_output(value):    
+def update_output(value):
+#     df.loc[(df.Event == 'Shot')&(df['Detail 2'] == 'On Net')&(df.Team == df['Home Team']), 'home_shot'] = 1
+#     df.loc[(df.Event == 'Shot')&(df['Detail 2'] == 'On Net')&(df.Team == df['Away Team']), 'away_shot'] = 1
+
+#     df.loc[(df.Team == df['Home Team']), 'shots'] = df['home_shot']
+#     df.loc[(df.Team == df['Away Team']), 'shots'] = df['away_shot']
+    
     df.loc[(df['Home Team'].isin(value)), 'goals'] = df['Home Team Goals']
     df.loc[( df['Home Team'].isin(value)), 'goals'] = df['Away Team Goals']
     
     df_c = df[df.Team.isin(value)]
 
+#    df_c['SOG'] = df_c.groupby(['Team'])['shots'].transform('sum')
+
+
     df_shot = df_c[df_c.Event == 'Shot']
+
+
+#    gb = (df_shot.groupby(['Team', 'Detail 1'])['goals'].sum())/df_shot.groupby(['Team', 'Detail 1'])['SOG'].sum()
+#    gb = gb.reset_index(name = 'Shooting %')
+    #gb_team = gb[gb.Team == value]
+    
+#    df_shot = df_shot.merge(gb, on = ['Team', 'Detail 1'])
     
     df_shot = df_shot[df_shot.Team.isin(value)]
     
@@ -229,8 +281,32 @@ def update_output(value,value2, value3):
     ts2 = df[(df.Event == 'Takeaway')&(df.Team.isin(value))&(df.Period == value3)]
     ts2 = ts2[ts2.game_date.isin(value2)]
 
-    fig = px.scatter(ts, x="X Coordinate", y="Y Coordinate", color = "Team", title = 'Recoveries/ Takeaways by Team')
-    fig.add_scatter(x=ts2["X Coordinate"], y=ts2["Y Coordinate"], mode='markers', name="Takeaway",  text=ts2["Team"])
+    fig = px.scatter(ts, x="X Coordinate", y="Y Coordinate", color = "Team", title = 'Recoveries/ Takeaways by Team', hover_name="Player")
+    fig.add_scatter(x=ts2["X Coordinate"], y=ts2["Y Coordinate"], mode='markers', name="Takeaway",  text=ts2['Team'] + " " + ts2['Player'])
+    fig.update_layout(yaxis_range=[0,85],xaxis_range=[0,200] )
+    return fig
+
+
+@app.callback(
+    dash.dependencies.Output('display-selected-values6', 'figure'),
+    [dash.dependencies.Input('demo-dropdown8', 'value'),
+    dash.dependencies.Input('demo-dropdown9', 'value'),
+    dash.dependencies.Input('year-slider10', 'value')])
+
+
+def update_output(value,value2, value3):
+    
+    dfz = df[(df.Event == 'Zone Entry')&(df.Team.isin(value))&(df.Period == value3)]
+    dfz = dfz[dfz.game_date.isin(value2)]
+
+    fig = go.Figure(go.Histogram2d(x=dfz["X Coordinate"], y=dfz["Y Coordinate"],
+        autobinx=False,
+        xbins=dict(start=50, end=150, size=5),
+        autobiny=False,
+        ybins=dict(start=0, end=80, size=5)))
+    
+    fig.update_layout(title = 'Heatmap Zone Entry plot by Period', xaxis_title="X Coordinate",
+    yaxis_title="Y Coordinate")
     
     return fig
 
