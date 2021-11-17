@@ -236,29 +236,14 @@ def update_output(value,value2,value3):
     [dash.dependencies.Input('demo-dropdown3', 'value')])
 
 def update_output(value):
-#     df.loc[(df.Event == 'Shot')&(df['Detail 2'] == 'On Net')&(df.Team == df['Home Team']), 'home_shot'] = 1
-#     df.loc[(df.Event == 'Shot')&(df['Detail 2'] == 'On Net')&(df.Team == df['Away Team']), 'away_shot'] = 1
-
-#     df.loc[(df.Team == df['Home Team']), 'shots'] = df['home_shot']
-#     df.loc[(df.Team == df['Away Team']), 'shots'] = df['away_shot']
     
     df.loc[(df['Home Team'].isin(value)), 'goals'] = df['Home Team Goals']
     df.loc[( df['Home Team'].isin(value)), 'goals'] = df['Away Team Goals']
     
     df_c = df[df.Team.isin(value)]
 
-#    df_c['SOG'] = df_c.groupby(['Team'])['shots'].transform('sum')
-
-
     df_shot = df_c[df_c.Event == 'Shot']
 
-
-#    gb = (df_shot.groupby(['Team', 'Detail 1'])['goals'].sum())/df_shot.groupby(['Team', 'Detail 1'])['SOG'].sum()
-#    gb = gb.reset_index(name = 'Shooting %')
-    #gb_team = gb[gb.Team == value]
-    
-#    df_shot = df_shot.merge(gb, on = ['Team', 'Detail 1'])
-    
     df_shot = df_shot[df_shot.Team.isin(value)]
     
     fig = px.sunburst(df_shot, path=['Detail 1', 'Detail 2'], values='goals', title="Shooting Profile by Shot Type")
